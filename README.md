@@ -11,7 +11,7 @@ pip install pydocxtpl
 ## 使用
 
 要使用 pydocxtpl，需要了解 [jinja2 模板的语法](http://docs.jinkan.org/docs/jinja2/templates.html) 。  
-如果用过 docxtpl，应该就会用 pydocxtpl。 
+如果用过 [docxtpl](https://github.com/elapouya/python-docx-template) ，应该就会用 pydocxtpl。 
 
 *   示例代码
 ```python
@@ -40,83 +40,45 @@ pydocxtpl 会合并叶节点的 tag 来作为 jinja2 模板，使用 xml 树作�
 *   合并叶节点 tag 得到的 jinja2 模板。  
 
 ```jinja2
-{%default '0,1,0,0' %}
-{%if is_paid %}{%seg '0,1,0,1,0'%}{%endseg%}
-{%run '0,1,0,2' %}
-{%run '0,1,0,3' %}
-{% endif %}{%seg '0,1,0,4,0'%}{%endseg%}
-{%seg '0,1,1,0,0'%}{%endseg%}
-{%seg '0,1,1,0,1'%}{{ customer_name }}{%endseg%}
-{%seg '0,1,1,0,2'%}{%endseg%}
-{%para '0,1,2' %}
-{%para '0,1,3' %}
+{%para '0,1,0' %}
+{%default '0,1,1,0' %}
+{%for  person in persons%}{%seg '0,1,1,1,0'%}{%endseg%}
+{%run '0,1,1,2' %}
+{%run '0,1,1,3' %}
+{%seg '0,1,1,4,0'%}{{person.name}}{%endseg%}
+{%run '0,1,1,5' %}
+{%seg '0,1,1,6,0,0'%}{{ person.name}}{%endseg%}
+{%run '0,1,1,6,1' %}
+{%run '0,1,1,7' %}
+{%run '0,1,1,8' %}
+{%default '0,1,2,0' %}
+{%run '0,1,2,1' %}
+{%run '0,1,2,2' %}
+{%seg '0,1,2,3,0'%}{%endseg%}
+{%seg '0,1,2,3,1'%}{{person.address}}{%endseg%}
+{%run '0,1,2,4' %}
+{%default '0,1,3,0' %}
+{%run '0,1,3,1' %}
+{%seg '0,1,3,2,0'%}{{person.name}}{%endseg%}
+{%pic person.pic%}{%seg '0,1,3,3,0'%}{%endseg%}
+{%  endfor%}{%seg '0,1,3,4,0'%}{%endseg%}
 {%para '0,1,4' %}
 {%default '0,1,5,0' %}
 {%default '0,1,5,1' %}
 {%default '0,1,5,2,0' %}
 {%default '0,1,5,2,1,0' %}
-{%para '0,1,5,2,1,1' %}
+{%default '0,1,5,2,1,1,0' %}
+{%for person in persons%}{%seg '0,1,5,2,1,1,1,0'%}{%endseg%}
+{%seg '0,1,5,2,1,1,2,0'%}{{person.name}}{%endseg%}
 {%default '0,1,5,2,2,0' %}
-{%para '0,1,5,2,2,1' %}
+{%default '0,1,5,2,2,1,0' %}
+{%seg '0,1,5,2,2,1,1,0'%}{{person.address}}{%endseg%}
 {%default '0,1,5,2,3,0' %}
-{%para '0,1,5,2,3,1' %}
-{%default '0,1,5,3,0' %}
-{%default '0,1,5,3,1,0' %}
-{%default '0,1,5,3,1,1,0' %}
-{% for i in items %}{%seg '0,1,5,3,1,1,1,0'%}{%endseg%}
-{%seg '0,1,5,3,1,1,2,0'%}{{ i.desc }}{%endseg%}
-{%default '0,1,5,3,2,0' %}
-{%default '0,1,5,3,2,1,0' %}
-{%seg '0,1,5,3,2,1,1,0'%}{{ i.qty }}{%endseg%}
-{%default '0,1,5,3,3,0' %}
-{%default '0,1,5,3,3,1,0' %}
-{%seg '0,1,5,3,3,1,1,0'%}{{ i.price }}{%endseg%}
-{% endfor %}{%seg '0,1,5,3,3,1,2,0'%}{%endseg%}
-{%default '0,1,5,4,0' %}
-{%default '0,1,5,4,1,0' %}
-{%para '0,1,5,4,1,1' %}
-{%default '0,1,5,4,2,0' %}
-{%para '0,1,5,4,2,1' %}
-{%default '0,1,5,4,3,0' %}
-{%default '0,1,5,4,3,1,0' %}
-{%seg '0,1,5,4,3,1,1,0'%}{{total_price}}{%endseg%}
+{%default '0,1,5,2,3,1,0' %}
+{%run '0,1,5,2,3,1,1' %}
+{% pic person.pic%}{%seg '0,1,5,2,3,1,2,0'%}{%endseg%}
+{%endfor%}{%seg '0,1,5,2,3,1,3,0'%}{%endseg%}
 {%para '0,1,6' %}
-{%default '0,1,7,0' %}
-{%if is_paid %}{%seg '0,1,7,1,0'%}{%endseg%}
-{%seg '0,1,7,1,1'%}{%endseg%}
-{% else %}{%seg '0,1,7,1,2'%}{%endseg%}
-{%seg '0,1,7,2,0'%}{%endseg%}
-{%seg '0,1,7,2,1'%}{{total_price}}{%endseg%}
-{%seg '0,1,7,2,2'%}{%endseg%}
-{% if in_europe %}{%seg '0,1,7,2,3'%}{%endseg%}
-{%seg '0,1,7,2,4'%}{%endseg%}
-{% else %}{%seg '0,1,7,2,5'%}{%endseg%}
-{%seg '0,1,7,2,6'%}{%endseg%}
-{% endif %}{%seg '0,1,7,2,7'%}{%endseg%}
-{%seg '0,1,7,2,8'%}{%endseg%}
-{%endif %}{%seg '0,1,7,2,9'%}{%endseg%}
-{%para '0,1,8' %}
-{%default '0,1,9,0' %}
-{% if is_paid %}{%seg '0,1,9,1,0'%}{%endseg%}
-{%para '0,1,10' %}
-{%default '0,1,11,0' %}
-{%else %}{%seg '0,1,11,1,0'%}{%endseg%}
-{%default '0,1,12,0' %}
-{%seg '0,1,12,1,0'%}{%endseg%}
-{%seg '0,1,12,1,1'%}{{total_price}}{%endseg%}
-{%seg '0,1,12,1,2'%}{%endseg%}
-{% if in_europe %}{%seg '0,1,12,2,0'%}{%endseg%}
-{%seg '0,1,12,2,1'%}{%endseg%}
-{% else %}{%seg '0,1,12,2,2'%}{%endseg%}
-{%seg '0,1,12,2,3'%}{%endseg%}
-{% endif %}{%seg '0,1,12,2,4'%}{%endseg%}
-{%seg '0,1,12,2,5'%}{%endseg%}
-{%default '0,1,13,0' %}
-{%endif %}{%seg '0,1,13,1,0'%}{%endseg%}
-{%para '0,1,14' %}
-{%para '0,1,15' %}
-{%default '0,1,16,0' %}
-{%seg '0,1,16,1,0'%}{{ company_name }}{%endseg%}
-{%default '0,1,17' %}
+{%default '0,1,7' %}
 {%headtail '0,2' %}
 ```
