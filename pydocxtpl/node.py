@@ -12,6 +12,8 @@ class Node(object):
 
     def __init__(self):
         self._children = []
+        self.unpacked = False
+        self.no = 0
 
     @property
     def depth(self):
@@ -59,8 +61,13 @@ class Node(object):
             node_cls = self.get_node_cls(sub_element)
             child = node_cls(sub_element, self)
             self.add_child(child)
+            if not self.unpacked and child.unpacked:
+                self.unpacked = True
 
     def clear_element(self):
+        if not self.unpacked:
+            del self._children[:]
+            return
         elms = self._element[:]
         for elm in elms:
             self._element.remove(elm)
@@ -108,7 +115,28 @@ class HtNode(Node):
         else:
             return Node.to_tag(self)
 
-class Root(Node):
+    def enter(self):
+        if self.no != 0:
+            self._parent.exit()
+
+    def exit(self):
+        if self.no == 0:
+            self._parent.enter()
+
+
+class RvNode(Node):
+    ext_tag = 'rv'
+
+    def enter(self):
+        self.rv = self.copy_element()
+
+    def exit(self):
+        self._parent.process_child_rv(self.rv)
+
+    def process_child_rv(self, rv):
+        self.rv.append(rv)
+
+class Root(RvNode):
     ext_tag = 'root'
 
     def __init__(self, root):
@@ -118,7 +146,7 @@ class Root(Node):
         self.part = root.part
         self.node_map = {}
         Node.__init__(self)
-        head_node = HtNode(self)
+        self.head_node = head_node = HtNode(self)
         tail_node = HtNode(self)
         self.add_child(head_node)
         self.unpack_element()
@@ -129,6 +157,14 @@ class Root(Node):
     @property
     def node_key(self):
         return '0'
+
+    def enter(self):
+        self.clear_element()
+        self.rv = self._element
+
+    def exit(self):
+        self.current_node = self.head_node
+        self.current_key = ''
 
     def find_lca(self, pre, next):
         # find lowest common ancestor
@@ -177,17 +213,6 @@ class Root(Node):
         self.find_lca(self.last_node, self.current_node)
         return self.current_node
 
-class RvNode(Node):
-    ext_tag = 'rv'
-
-    def enter(self):
-        self.rv = self.copy_element()
-
-    def exit(self):
-        self._parent.process_child_rv(self.rv)
-
-    def process_child_rv(self, rv):
-        self.rv.append(rv)
 
 class BodyX(_Body, RvNode):
     ext_tag= 'body'
@@ -195,11 +220,7 @@ class BodyX(_Body, RvNode):
     def __init__(self, element, parent):
         _Body.__init__(self, element, parent)
         RvNode.__init__(self)
-        self.unpack_element()
-
-    def enter(self):
-        self.clear_element()
-        self.rv = self._element
+        self.unpack_and_clear()
 
 
 class Default(RvNode):

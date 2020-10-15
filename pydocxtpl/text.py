@@ -55,10 +55,11 @@ class ParagraghX(Paragraph, RvNode):
                 node_cls = self.get_node_cls(sub_element)
                 child = node_cls(sub_element, self)
                 self.add_child(child)
+            self.unpacked = True
             self.clear_element()
         else:
             RvNode.unpack_and_clear(self)
-        self.unpacked = True
+
 
     def register_drawing(self, drawing):
         self.current_drawing = drawing
@@ -114,6 +115,7 @@ class RunX(Run, RvNode):
     def unpack_r(self):
         if not tag_test(self.text):
             return
+        self.unpacked = True
         parts = control_split(self.text)
         for index,part in enumerate(parts):
             if part == '':
@@ -131,7 +133,6 @@ class RunX(Run, RvNode):
             else:
                 child = ControlSegment(part, self)
                 self.add_child(child)
-        self.unpacked = True
 
     def enter(self):
         self.rv = self.copy_element()
@@ -226,12 +227,17 @@ class Hyperlink(Parented):
         self.clear()
         self.add_run(text)
 
+from .utils import bind
 class HyperlinkX(Hyperlink, RvNode):
     ext_tag = 'hyperlink'
 
     def __init__(self, hyperlink, parent):
         Hyperlink.__init__(self, hyperlink, parent)
         RvNode.__init__(self)
+        bind(ParagraghX.fix_and_unpack, self)
+        bind(ParagraghX.text_4_fix, self)
+        bind(ParagraghX.register_drawing, self)
+        bind(ParagraghX.replace_pic, self)
         self.unpack_hyperlink()
         self.current_drawing = None
 
@@ -239,11 +245,6 @@ class HyperlinkX(Hyperlink, RvNode):
         if not tag_test(self.text):
             return
         self.fix_and_unpack()
-
-    fix_and_unpack = ParagraghX.fix_and_unpack
-    text_4_fix = ParagraghX.text_4_fix
-    register_drawing = ParagraghX.register_drawing
-    replace_pic = ParagraghX.replace_pic
 
     @property
     def print_tag(self):

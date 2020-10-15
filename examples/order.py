@@ -9,7 +9,7 @@ def pth(fname):
 
 from pydocxtpl import DocxWriter
 
-tpl = DocxWriter(pth('order_tpl.docx'), debug=True)
+tpl = DocxWriter(pth('order_tpl.docx'))
 
 context = {
     'customer_name': 'Eric',

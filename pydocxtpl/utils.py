@@ -89,3 +89,10 @@ class TreeProperty(object):
         if not hasattr(instance, self._name):
             instance.__dict__[self._name] = getattr(instance._parent, self.name)
         return instance.__dict__[self._name]
+
+from types import MethodType
+def bind(method, instance):
+    if isinstance(method, MethodType):
+        instance.__dict__[method.__name__] = MethodType(method.im_func, instance)
+    else:
+        instance.__dict__[method.__name__] = MethodType(method, instance)
