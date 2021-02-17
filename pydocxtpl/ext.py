@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import sys
+from six import text_type
 from jinja2 import Environment, nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
@@ -68,7 +69,7 @@ class SegmentExtension(Extension):
         return rv
 
 class PicExtension(Extension):
-    tags = set(['pic'])
+    tags = set(['pic', 'img'])
 
     def __init__(self, environment):
         super(self.__class__, self).__init__(environment)
@@ -83,6 +84,7 @@ class PicExtension(Extension):
 
     def _node(self, fname, caller):
         node = self.environment.root.current_node
+        fname = text_type(fname)
         if isinstance(node, RunX):
             node._parent.replace_pic(fname)
         elif isinstance(node, Segment):

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from six import text_type
+from unicodedata import normalize
 from copy import deepcopy
 from docx.document import _Body
 from .utils import TreeProperty
@@ -49,7 +51,8 @@ class Node(object):
         return self.node_tag
 
     def tag_tree(self):
-        print('\t' * self.depth, self.print_tag)
+        print_tag = normalize("NFKD", text_type(self.print_tag))
+        print('\t' * self.depth, print_tag)
         for child in self._children:
             child.tag_tree()
 
